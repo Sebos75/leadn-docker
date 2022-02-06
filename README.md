@@ -1,6 +1,8 @@
 # learn-docker
 Informacje dotyczące podstaw dockera i docker-compose
 
+Dokumentacja: https://docs.docker.com/reference/
+
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
@@ -31,7 +33,8 @@ docker ps -a
 4. Docker tworzy kontener z obrazu (instację) i go uruchamia.
 5. jeżeli kontener zatrzymany nadal istnieje i można go usunąć.
 
-### przydatne komendy
+### podstawowe komendy
+
 
 ```
 # lista komend
@@ -44,25 +47,57 @@ docker run --help
 # pobranie obrazu 'hello-world' z docker-huba
 docker pull hello-world
 
-# informacja o stanie dockera (liczba kontenerów, obrazów, cpu, mem, lokalizacji danych)
-docker info
-
 # uruchomienie servera apache na porcie hosta 8002 (http://localhost:8002)
 # opcja `-p` mapuje nr portu zewnętrznego (hosta) do wewnętrznego (kontenera)
 # opcja `-d` powoduje, że operacja wykona się w tle - zwolni shell'a
+# Uwaga, operacja 'run' za każdym razem tworzy nowy kontener!
 docker run -p 8002:80 -d httpd
 
+# uruchomienie kontenera z nadaniem nazwy 'my-apache' (bez = nadawana jest automatycznie)
+docker run --name my-apache -p 8002:80 -d httpd
+
 # zatrzymanie działającego kontenera (wystarczy podać pierwsze znaki container_id)
-docker stop _container_id_
+docker stop _container_id_ // lub nazwa kontenera
 
 # uruchomienie działającego kontenera
 docker start _container_id_
 
 
 # uruchomienie kontenera z obrazu 'ubuntu'
-docker run -it ubuntu bash // -it = interactive + terminal
+docker run -it ubuntu bash // -it = interactive + tty
+
+# uruchomienie komendy w działającym kontenerze
+docker exec _container_id_ ls -l
+
+# uruchomienie basha w działającym kontenerze
+docker exec -it _container_id_ bash
 
 
+```
+### komendy dodatkowe
+```
+# informacja o stanie dockera (liczba kontenerów, obrazów, cpu, mem, lokalizacji danych)
+docker info
 
+# sprawdzenie wersji jądra linuksa
+docker run ubuntu uname -a
 
+# informacja o warstwach obrazu
+docker history ubuntu
+
+# obrazy nie posiadające "entrypoint" wyłaczają się od razu po uruchomieniu
+# (np. ubuntu) w takim przypadku można dodać parametr 'entrypoint' nadpisujący
+# Uwaga, powoduje to nadpisanie oryginalnego entrypointa z obrazu!
+docker run -it --entrypoint bash ubuntu
+```
+#### utrwalanie kontenerów
+```
+# stworzenie własnego obrazu na podstawie istniejącego kontenera
+docker commit _container_ _new_image_name_
+
+# zapis obrazu do pliku
+docker save _image_name_ > _file-name_.tar
+
+# odczyt obrazu z pliku
+docker load < _file-name_.tar
 ```
