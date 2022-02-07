@@ -2,7 +2,7 @@
 Informacje dotyczące podstaw dockera i docker-compose
 
 Dokumentacja: https://docs.docker.com/reference/
-
+Kurs na Youtube - [Programator](https://youtube.com/playlist?list=PLkcy-k498-V5AmftzfqinpMF2LFqSHK5n)
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
