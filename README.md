@@ -94,7 +94,7 @@ docker history ubuntu
 
 # obrazy nie posiadające "entrypoint" wyłaczają się od razu po uruchomieniu
 # (np. ubuntu) w takim przypadku można dodać parametr 'entrypoint' nadpisujący
-# Uwaga, powoduje to nadpisanie oryginalnego entrypointa z obrazu!
+# Uwaga, powoduje to nadpisanie oryginalnego entrypointa (lub cmd) z obrazu!
 docker run -it --entrypoint bash ubuntu
 ```
 
@@ -102,29 +102,52 @@ docker run -it --entrypoint bash ubuntu
 
 Plik `Dockerfile` służy do tworzenia przepisu budowy obrazu na podstawie innego, istniejącego obrazu.
 
-Przykładowy plik `Dockerfile`
+Jeżeli użyjemy wywałania `docker run <image-name> bash`, czyli podamy na końcu jakąś komendę,
+to w takim przypadku nadpisujemy komendę `CMD` lub `ENTRYPOINT` zapisany w `Dockerfile` - nie zostanie on wykonany.
+
+Komenda `ENTRYPOINT` umieszczona w `Dockerfile`, w odróżnieniu od `CMD`, pozwala na przekazanie parametrów podczas uruchamiania obrazu, np.
+`docker run <my-image> arg1`
+- w takim przypadku do komendy umieszczonej w `ENTRYPOINT` zostanie przekazany argunet `arg1`
+
+Jednoczesne umieszczenie  `CMD` i `ENTRYPOINT`, powoduję, że `ENTRYPOINT` użyje wartości z tablicy `CMD` jako domyślnego argumentu (działa tylko dla formy "exec" - tablicowej).
+
+Komenda `docker run --entrypoint <my-cmd>` pozwala na nadpisanie ENTRYPOINTA podczas wywołania.
+
+Przykładowy plik `Dockerfile` z komentarzami znajduje się w bieżącym katalogu.
+
+#### Wolumeny
+Wolumeny zarządzane przez dockera
+
+Wolumeny żyją niezależnie od kontenera.
+
+Docker zarządza lokalizacją wolumenów.
 ```
-# obraz wzorcowy
-FROM ubuntu:20.04
+# wyświetlenie wolumentów wirtualnych dockera
+docker volume ls
 
-# ustawienie strefy
-ENV TZ=Europe/Warsaw
+# utworzenie
+docker volume create my1
 
-# wylaczenie pytan
-ENV DEBIAN_FRONTEND=noninteractive
+# usuwanie
+docker volume rm my1
+
+# podłączenie wolumenu 'my-vol1'(jeżeli nie istnieje - zostaje utworzony), po ":" podajemy folder, gdzie zostanie podłączony
+docker run --volume <my-vol1>:/app <my-img1>
+
+# istnieją rózwnież volumeny aninimowe, żeby do utworzyć nie podajemy jego nazwy, np.:
+docker run --volume /app <my-img1>
+# wówczas tworzy się volumen z losową nazwą
 
 
-# wazne, aby zminimalizowac liczbe linii "RUN",
-# - kazda tworzy osobna warstwe
-RUN apt update && apt install vim -y \
-    && apt install mc -y \
-    && apt install telnet -y
-
-# kopiowanie pliki z hosta do dockera
-COPY README.md .
 ```
+#### Wolumeny bind
+Możemy zamiast wolumentu jako pliku podpiąć katalog, należy wówczas podać **ścieżkę bezględną**.
+
+
+
+
+
 #### budowanie obrazu
-
 - minimalistyczne: `docker build .`
 - z podaniem nazwy obrazu: `docker build -t <nazwa-obrazu> .`
 - z podaniem kontekstu*: `docker build -t <nazwa-obrazu> ./src`

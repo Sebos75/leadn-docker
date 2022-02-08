@@ -13,6 +13,12 @@ RUN apt update && apt install vim -y \
     && apt install mc -y \
     && apt install telnet -y
 
+
+# polecenie WORKDIR tworzy katalog (jeżeli nie istnieje)
+# oraz ustawia się w tym katalogu
+WORKDIR /app
+
+
 # kopiowanie pliku z hosta do dockera (katalogu '/'')
 # można podać wiele plików do skopiowania oraz używać '*'
 COPY README.md .
@@ -32,3 +38,24 @@ COPY src /var/www/
 
 # drugie zastosowanie ADD, to rozpakowanie pliku i wrzucenie do obrazu
 # ADD plik.tar.gz .
+
+# instrukcja CMD pozwala na wykonywanie instrukcji wewnątrz kontenera
+# można umieścić tylko jedną instrukcję,
+# Istnieje dwie formy CMD: shellowa oraz exec
+
+# forma shellowa:
+# CMD echo 'Current directory: ' && pwd
+# CMD - forma shellowa CMD skladająca się z kilku poleceń:
+# CMD echo 'Current directory: ' && pwd
+
+# forma exec - komenda z listą argumentów,
+# nie działają potoki itp., służy do uruchomienia pojedyńczego programu
+# CMD [ "ls", "/etc","-lS" ]
+# jest to odpowienik: 'ls /etc -lS'
+
+
+# instrukcja ENTRYPOINT działa analogicznie do CMD, z tą różnicą,
+# że pomożna do niej z zewnątrz przekazać argumenty
+# (podczas instancji uruchomiania kontenera)
+# ENTRYPOINT [ "ls", "/etc","-lS" ]
+
