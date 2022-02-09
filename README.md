@@ -96,6 +96,16 @@ docker history ubuntu
 # (np. ubuntu) w takim przypadku można dodać parametr 'entrypoint' nadpisujący
 # Uwaga, powoduje to nadpisanie oryginalnego entrypointa (lub cmd) z obrazu!
 docker run -it --entrypoint bash ubuntu
+
+# wyświetlenie zmiennych środowiskowych za pomocą komendy `env`
+docker run ubuntu env
+
+# dodanie zmiennej środowiskowej 'db=elastic'
+docker run -e db=elastic ubuntu env
+
+# wyświeltenie ostatnich logów kontenera
+docker logs <container>
+
 ```
 
 ### Dockerfile
