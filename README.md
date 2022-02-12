@@ -59,18 +59,26 @@ docker run --name my-apache -p 8002:80 -d httpd
 # zatrzymanie działającego kontenera (wystarczy podać pierwsze znaki container_id)
 docker stop <container> // lub nazwa kontenera
 
-# uruchomienie działającego kontenera
+# uruchomienie istniejącego kontenera
 docker start <container>
 
 
 # uruchomienie kontenera z obrazu 'ubuntu'
-docker run -it ubuntu bash // -it = interactive + tty
+# (bez podania "-it" kontener wyłączy się zaraz po uruchomieniu)
+docker run -it ubuntu // -it = interactive + tty
+
 
 # uruchomienie komendy w działającym kontenerze
 docker exec <container> ls -l
 
 # uruchomienie basha w działającym kontenerze
 docker exec -it <container> bash
+
+# podłączenie się pod działający kontener
+docker attach <container>
+
+# odłączenie się od kontenera, bez zamykania:
+# CTRL + p, p
 
 # kopiowanie plików z hosta do kontenera
 # Uwaga, przy kopiowaniu nie trzeba uruchamiać kontenera!!
@@ -85,6 +93,9 @@ docker cp <container>:<file> .
 ```
 # informacja o stanie dockera (liczba kontenerów, obrazów, cpu, mem, lokalizacji danych)
 docker info
+
+# informacja szczegółowa o kontenerze
+docker inspect <container>
 
 # sprawdzenie wersji jądra linuksa
 docker run ubuntu uname -a
@@ -156,6 +167,48 @@ Możemy zamiast wolumentu jako pliku podpiąć katalog, należy wówczas podać 
 
 
 
+#### network
+
+Wyświetlenie dostępnych sieci
+```
+docker network ls
+```
+Docker tworzy domyślnie sieć `bridge` o typie bridge, sieć `bridge`
+pozwala na łączenie kontenerów między sobą oraz zapewnia dostęp do internetu za pomocą komputera hosta.
+Każdy nowy kontener jest domyślnie podłączany pod sieć `bridge`.
+
+Domyślna sieć `bridge` zapewnia połączenia pomiędzy kontenerami za pomocą ich adresów IP, ale nie
+za pomocą nazw.
+
+Wyświetlenie informacji o sieci:
+```
+docker network inspect bridge
+```
+
+Tworzenie nowej sieci
+```
+docker network create <nazwa-sieci>
+```
+
+Podłączenie kontenera do sieci (musi istnieć jedno i drugie)
+```
+docker network connect <nazwa-sieci> <container>
+```
+
+Odłączenie od sieci
+```
+docker network disconnect <nazwa-sieci> <container>
+```
+
+
+Jeżeli dwa kontenery będą podłączone do określonej (nie domyślnej sieci bridge),
+to widzą się na wzajem poprzez nazwę kontenera.
+Widać to za pomocą komendy `network insepect <nazwa sieci>` 
+
+Sieci własne możemy dowolnie podłączać i odłączać w czasie pracy kontenerów również od sieci domyślnej `bridge`.
+
+Jeżeli podczas tworzenia kontenera podamy sieć przez flagę `--network`, to tworzynu kontener
+będzie podłączony tylko do tej sieci (nie zostanie podłączony do domyślnej sieci `bridge`).
 
 #### budowanie obrazu
 - minimalistyczne: `docker build .`
