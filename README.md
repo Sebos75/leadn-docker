@@ -51,6 +51,7 @@ docker pull hello-world
 # opcja `-p` mapuje nr portu zewnętrznego (hosta) do wewnętrznego (kontenera)
 # opcja `-d` powoduje, że operacja wykona się w tle - zwolni shell'a
 # Uwaga, operacja 'run' za każdym razem tworzy nowy kontener!
+# (chyba, że dodamy flagę '--rm')
 docker run -p 8002:80 -d httpd
 
 # uruchomienie kontenera z nadaniem nazwy 'my-apache' (bez = nadawana jest automatycznie)
@@ -67,6 +68,9 @@ docker start <container>
 # (bez podania "-it" kontener wyłączy się zaraz po uruchomieniu)
 docker run -it ubuntu // -it = interactive + tty
 
+# flaga '--rm', powoduje, że kontener zostastanie usunięty po zakończeniu pracy
+# opcja użyteczna podczas testowania kontenerów
+docker run --rm -it ubuntu
 
 # uruchomienie komendy w działającym kontenerze
 docker exec <container> ls -l
@@ -84,7 +88,7 @@ docker attach <container>
 # Uwaga, przy kopiowaniu nie trzeba uruchamiać kontenera!!
 docker cp <file> <container>:/
 
-# kopiowanie plików z hosta do kontenera
+# kopiowanie plików z kontenera do hosta
 # Uwaga, przy kopiowaniu nie trzeba uruchamiać kontenera!!
 docker cp <container>:<file> .
 
@@ -107,6 +111,10 @@ docker history ubuntu
 # (np. ubuntu) w takim przypadku można dodać parametr 'entrypoint' nadpisujący
 # Uwaga, powoduje to nadpisanie oryginalnego entrypointa (lub cmd) z obrazu!
 docker run -it --entrypoint bash ubuntu
+
+# inne użycie (uruchamia komendę 'cat' z podanym argumentem )
+docker run --rm --entrypoint cat ubuntu /etc/hosts
+
 
 # wyświetlenie zmiennych środowiskowych za pomocą komendy `env`
 docker run ubuntu env
@@ -155,7 +163,7 @@ docker volume rm my1
 # podłączenie wolumenu 'my-vol1'(jeżeli nie istnieje - zostaje utworzony), po ":" podajemy folder, gdzie zostanie podłączony
 docker run --volume <my-vol1>:/app <my-img1>
 
-# istnieją rózwnież volumeny aninimowe, żeby do utworzyć nie podajemy jego nazwy, np.:
+# istnieją rózwnież volumeny anonimowe, żeby go utworzyć nie podajemy jego nazwy, np.:
 docker run --volume /app <my-img1>
 # wówczas tworzy się volumen z losową nazwą
 
@@ -177,8 +185,7 @@ Docker tworzy domyślnie sieć `bridge` o typie bridge, sieć `bridge`
 pozwala na łączenie kontenerów między sobą oraz zapewnia dostęp do internetu za pomocą komputera hosta.
 Każdy nowy kontener jest domyślnie podłączany pod sieć `bridge`.
 
-Domyślna sieć `bridge` zapewnia połączenia pomiędzy kontenerami za pomocą ich adresów IP, ale nie
-za pomocą nazw.
+Domyślna sieć `bridge` zapewnia połączenia pomiędzy kontenerami wyłącznie za pomocą adresów IP, ale nie za pomocą nazw.
 
 Wyświetlenie informacji o sieci:
 ```
@@ -203,16 +210,16 @@ docker network disconnect <nazwa-sieci> <container>
 
 Jeżeli dwa kontenery będą podłączone do określonej (nie domyślnej sieci bridge),
 to widzą się na wzajem poprzez nazwę kontenera.
-Widać to za pomocą komendy `network insepect <nazwa sieci>` 
+Widać to za pomocą komendy `network insepect <nazwa sieci>`
 
 Sieci własne możemy dowolnie podłączać i odłączać w czasie pracy kontenerów również od sieci domyślnej `bridge`.
 
-Jeżeli podczas tworzenia kontenera podamy sieć przez flagę `--network`, to tworzynu kontener
+Jeżeli podczas tworzenia kontenera podamy sieć przez flagę `--network`, to tworzyny kontener
 będzie podłączony tylko do tej sieci (nie zostanie podłączony do domyślnej sieci `bridge`).
 
 #### budowanie obrazu
 - minimalistyczne: `docker build .`
-- z podaniem nazwy obrazu: `docker build -t <nazwa-obrazu> .`
+- z podaniem tagu (nazwy obrazu): `docker build -t <nazwa-obrazu> .`
 - z podaniem kontekstu*: `docker build -t <nazwa-obrazu> ./src`
 - z inną lokalizacją pliku i kontekstu:
     `docker build -t <nazwa-obrazu> -f Dockerfile  ./src`
@@ -252,3 +259,24 @@ docker push <user/my-image>
 ### zalecenia dotyczące optymalizacji
 - W pliku `Dockerfile` używać jak najmniej osobnych linii COPY  (tworzyć jedną łączoną przez `&&`) - każda linia, podczas budowy obrazu tworzy tymczasową warstwę (obraz).
 - Do kontektu przekazywać tylko niezbędne katalogi (nie podawać katalogu głównego gdzie znajduje się wiele plików, np. pliku z folderu .git). Ponieważ wszystkie pliki z kontektu muszą byćp rzesłane do demona Dockera. Informacja o wielkości dostępna jest w pierwszej linii budowania dockera: `Sending build context to Docker daemon xxx`
+
+
+## docker-compose
+**Docker-compose** konfiguracji uruchomienia jednego lub wielu obrazów ze sobą. Zastępuje "ręczne" uruchamianie obrazu (tworzenie kontenera) z podawania parametrów. Upraszcza uruchomienie i zatrzymanie kompletu obrazów, wprowadza zależności pomiędzy nimi.
+Definicja pliku, (zgodnie z yaml) odbywa się na zasadzie kluczy i wartości.
+
+Konfiguracja znajduje się domyślnie w pliku `docker-compse.yml`, przykładowy pliku znajduje się w bieżącym katalogu.
+
+### Podstawowe komendy
+
+Pobranie/budowanie obrazów oraz stworzenie i uruchomienie konenerów (flaga `-d`, oznacza uruchomienie w tle):
+`docker-compose up -d`
+
+Zatrzymanie kontenerów:
+`docker-compose down`
+
+Uruchomienie z buildem obrazów (jeżeli takie były w definicji):
+`docker-compose up -d --build`
+
+Wyświetlenie logów (wszystkich kontenerów):
+`docker-compose logs`
