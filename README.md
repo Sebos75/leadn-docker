@@ -3,6 +3,9 @@ Informacje dotyczące podstaw dockera i docker-compose
 
 Dokumentacja: https://docs.docker.com/reference/
 Kurs na Youtube - [Programator](https://youtube.com/playlist?list=PLkcy-k498-V5AmftzfqinpMF2LFqSHK5n)
+
+
+Artykuł po polsku z Microsoftu: https://docs.microsoft.com/pl-pl/visualstudio/docker/tutorials/docker-tutorial
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
@@ -145,42 +148,39 @@ Komenda `docker run --entrypoint <my-cmd>` pozwala na nadpisanie ENTRYPOINTA pod
 Przykładowy plik `Dockerfile` z komentarzami znajduje się w bieżącym katalogu.
 
 #### Wolumeny
-Wolumeny zarządzane przez dockera
-
-Wolumeny żyją niezależnie od kontenera.
+Wolumeny zarządzane przez dockera i żyją niezależnie od kontenera.
 
 Docker zarządza lokalizacją wolumenów.
-```
-# wyświetlenie wolumentów wirtualnych dockera
-docker volume ls
 
-# utworzenie
-docker volume create my1
+wyświetlenie wolumentów wirtualnych dockera
+`docker volume ls`
 
-# usuwanie
-docker volume rm my1
+utworzenie
+`docker volume create my1`
 
-# podłączenie wolumenu 'my-vol1'(jeżeli nie istnieje - zostaje utworzony), po ":" podajemy folder, gdzie zostanie podłączony
-docker run --volume <my-vol1>:/app <my-img1>
+usuwanie
+`docker volume rm my1`
 
-# istnieją rózwnież volumeny anonimowe, żeby go utworzyć nie podajemy jego nazwy, np.:
-docker run --volume /app <my-img1>
-# wówczas tworzy się volumen z losową nazwą
+podłączenie wolumenu 'my-vol1' (jeżeli nie istnieje - zostaje utworzony), po ":" podajemy folder, gdzie zostanie podłączony
+`docker run --volume <my-vol1>:/app <my-img1>`
+
+istnieją rózwnież volumeny anonimowe, żeby go utworzyć nie podajemy jego nazwy, np.:
+`docker run --volume /app <my-img1>`
+wówczas tworzy się volumen z losową nazwą
 
 
-```
 #### Wolumeny bind
 Możemy zamiast wolumentu jako pliku podpiąć katalog, należy wówczas podać **ścieżkę bezględną**.
 
 
 
 
-#### network
+### network
 
 Wyświetlenie dostępnych sieci
-```
-docker network ls
-```
+
+`docker network ls`
+
 Docker tworzy domyślnie sieć `bridge` o typie bridge, sieć `bridge`
 pozwala na łączenie kontenerów między sobą oraz zapewnia dostęp do internetu za pomocą komputera hosta.
 Każdy nowy kontener jest domyślnie podłączany pod sieć `bridge`.
@@ -267,16 +267,51 @@ Definicja pliku, (zgodnie z yaml) odbywa się na zasadzie kluczy i wartości.
 
 Konfiguracja znajduje się domyślnie w pliku `docker-compse.yml`, przykładowy pliku znajduje się w bieżącym katalogu.
 
+Jeżeli w pliku nie dodamy nazwy kontenera (`container_name`), wówczas kontener będzie się nazwał wg wzorca:
+`<nazwa-katalogu>_<nazwa-serwisu>_1`
 ### Podstawowe komendy
 
-Pobranie/budowanie obrazów oraz stworzenie i uruchomienie konenerów (flaga `-d`, oznacza uruchomienie w tle):
+Pobranie/budowanie obrazów oraz stworzenie i uruchomienie konenerów,
+flaga `-d`, oznacza uruchomienie w tle:
 `docker-compose up -d`
 
-Zatrzymanie kontenerów:
+Uwaga, uruchomienie bez flagi `-d` i wciśnięcie `CTRL-C` **nie usuwa kontenerów**, tylko je zatrzymuje!
+
+
+Zatrzymanie kontenerów (**Uwaga!!** usuwa kontenery!! ):
 `docker-compose down`
+
+Bezpieczne zatrzymanie kontenerów (bez usuwania):
+`docker-compose stop`
+
+Uruchomienie kontenerów:
+`docker-compose start`
 
 Uruchomienie z buildem obrazów (jeżeli takie były w definicji):
 `docker-compose up -d --build`
 
 Wyświetlenie logów (wszystkich kontenerów):
 `docker-compose logs`
+
+
+Zmiana ustawień sieciowych wymaga przebudowy kontenerów, czyli wykonania `down/up`
+
+Dowolny usługę (kontener) mozna włączyć/wyłączyć używając komendy:
+`docker-compose start|stop <nazwa-uslugi>`
+
+## Konfiguracja
+
+Format wynikowy komendy `docker ps` można kongigutować w pliku `~/.docker/config.json`, dopisując linię
+```
+{
+  "psFormat": "table {{.ID}}\\t{{.Image}}\\t{{.Status}}\\t{{.Names}}"
+}
+```
+źródło: https://devdojo.com/bobbyiliev/how-to-change-the-docker-ps-output-format
+
+
+Wyłaczanie usługi dockera:
+```
+sudo systemctl stop docker
+sudo systemctl stop docker.socket
+```
