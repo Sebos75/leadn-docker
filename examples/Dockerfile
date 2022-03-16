@@ -60,3 +60,8 @@ COPY src /var/www/
 # (podczas instancji uruchomiania kontenera)
 # ENTRYPOINT [ "ls", "/etc","-lS" ]
 
+# można użyć jednocześnie CMD i ENTRYPOINT, np.:
+# CMD ["-lt"]
+# ENTRYPOINT [ "ls"]
+# wówczas CMD zawiera tablić domyślnych parametrów dla ENTRYPOINT
+

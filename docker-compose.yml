@@ -1,0 +1,24 @@
+version: '3'
+services:
+  front-end:
+    build: .
+    container_name: hello-app
+    restart: always
+    ports:
+      - 89:80
+    networks:
+      - mynet1
+    depends_on:
+      - elastic
+  elastic:
+    image: elasticsearch:7.17.0
+    container_name: hello-elastic
+    environment:
+      - transport.host=127.0.0.1
+      - http.host=0.0.0.0
+    ports:
+      - 9200:9200
+    networks:
+      - mynet1
+networks:
+  mynet1:

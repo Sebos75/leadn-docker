@@ -147,6 +147,9 @@ Komenda `docker run --entrypoint <my-cmd>` pozwala na nadpisanie ENTRYPOINTA pod
 
 Przykładowy plik `Dockerfile` z komentarzami znajduje się w bieżącym katalogu.
 
+Mechanizm **multi stage build** polega na tworzenia tymczasowego obrazu, wykorzystywanego następnie w obrazie docelowym. Definicja odbywa się w pliku `Dockerfile` za pomocą klauzuli `AS` w komendzie `FROM`.
+Głównym powodem stosowanie tej techniki jest znaczne zmniejszenie wynikowego obrazu.
+Przykładem może być kompilacja projektu angulara do plików wynikowych (`js`), następnie udostępnienie w finalnym obrazie za pomocą `nginx` tylko statycznych plików wynikowych (bez kodu źródłowego).
 #### Wolumeny
 Wolumeny zarządzane przez dockera i żyją niezależnie od kontenera.
 
@@ -310,7 +313,7 @@ Format wynikowy komendy `docker ps` można kongigutować w pliku `~/.docker/conf
 źródło: https://devdojo.com/bobbyiliev/how-to-change-the-docker-ps-output-format
 
 
-Wyłaczanie usługi dockera:
+Wyłączanie usługi dockera:
 ```
 sudo systemctl stop docker
 sudo systemctl stop docker.socket

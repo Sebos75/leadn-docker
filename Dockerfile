@@ -1,6 +1,6 @@
 FROM node:16 as build
 
-WORKDIR /usr/local/app
+WORKDIR /app
 
 # COPY package.json ./
 # COPY ./src ./src/
@@ -13,5 +13,5 @@ RUN npm run build
 
 FROM nginx:latest
 
-COPY --from=build /usr/local/app/dist/helloapp /usr/share/nginx/html
+COPY --from=build /app/dist/helloapp /usr/share/nginx/html
 EXPOSE 80
