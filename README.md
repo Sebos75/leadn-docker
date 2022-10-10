@@ -6,6 +6,8 @@ Kurs na Youtube - [Programator](https://youtube.com/playlist?list=PLkcy-k498-V5A
 
 
 Artykuł po polsku z Microsoftu: https://docs.microsoft.com/pl-pl/visualstudio/docker/tutorials/docker-tutorial
+
+Tricki z Infoshare: https://gist.github.com/lukaszlach/f205b2a2d3aba27ea9a3bed104f17307
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
