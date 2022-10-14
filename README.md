@@ -33,7 +33,7 @@ docker ps -a
 ### Zasada działania Dockera
 
 1. Na serwerze działa deamon `/usr/bin/dockerd`.
-2. Klient łączy się z deamonem.
+2. Klient łączy się z deamonem (dostęp do demona możliwy jest przez REST api, nawet z innego hosta).
 3. Deamon pobiera obraz (w pierwszej kolejności szuka go lokalnie).
 4. Docker tworzy kontener z obrazu (instację) i go uruchamia.
 5. jeżeli kontener zatrzymany nadal istnieje i można go usunąć.
