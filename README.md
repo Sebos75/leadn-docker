@@ -130,6 +130,13 @@ docker run -e db=elastic ubuntu env
 # wyświeltenie ostatnich logów kontenera
 docker logs <container>
 
+
+# wylistowanie tylko identyfikatorów dockerów
+docker ps -q
+
+# operacja na wielu kontenerach, z użyciem "$()"
+docker inspect $(docker ps -q)
+
 ```
 
 ### Dockerfile
