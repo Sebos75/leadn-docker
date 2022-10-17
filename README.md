@@ -103,6 +103,9 @@ docker cp <container>:<file> .
 # informacja o stanie dockera (liczba kontenerów, obrazów, cpu, mem, lokalizacji danych)
 docker info
 
+# wylistowanie obrazów z "maską"
+docker image ls mysql*
+
 # informacja szczegółowa o kontenerze
 docker inspect <container>
 
