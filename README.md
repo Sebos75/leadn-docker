@@ -9,6 +9,8 @@ Artykuł po polsku z Microsoftu: https://docs.microsoft.com/pl-pl/visualstudio/d
 
 Tricki z Infoshare: https://gist.github.com/lukaszlach/f205b2a2d3aba27ea9a3bed104f17307
 
+Inne opracowanie: [Docker esencja.pdf](https://drive.google.com/file/d/1-_JEs0XJNnalq9CI9CPd3gb0UdOytzrQ/view?usp=sharing)
+
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
