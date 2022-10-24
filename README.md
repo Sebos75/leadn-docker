@@ -1,25 +1,29 @@
 # learn-docker
+
 Informacje dotyczące podstaw dockera i docker-compose
 
 Dokumentacja: https://docs.docker.com/reference/
 Kurs na Youtube - [Programator](https://youtube.com/playlist?list=PLkcy-k498-V5AmftzfqinpMF2LFqSHK5n)
 
-
 Artykuł po polsku z Microsoftu: https://docs.microsoft.com/pl-pl/visualstudio/docker/tutorials/docker-tutorial
 
 Tricki z Infoshare: https://gist.github.com/lukaszlach/f205b2a2d3aba27ea9a3bed104f17307
+
 ## Informacje ogólne
 
 Docker to platforma do uruchamiana aplikacji z kontenerami, Docker jest jedną z implementacji kontenerów (nie jedyną).
 
 ### Definicje
+
 **image** (obraz) - jest pakietem zawierającym kod, biblioteki, pliki konfiguracyjne i zmienne środowiskowe.
+
 ```
 # wylistowanie dostępnych obrazów
 docker image ls // lub krócej: 'docker images'
 ```
 
 **container** (kontener) - to instacja obrazu, może być uruchomiona z dodatkowymi zmiennymi środowiskowymi. Każdy kontener ma własny identyfikator.
+
 ```
 # wylistowanie aktywnych (działających) kontenerów
 docker ps
@@ -38,8 +42,12 @@ docker ps -a
 4. Docker tworzy kontener z obrazu (instację) i go uruchamia.
 5. jeżeli kontener zatrzymany nadal istnieje i można go usunąć.
 
-### podstawowe komendy
+### Klient
 
+Domyślnym klientem dockera jest komenda CLI 'docker',
+darmową alternatywą jest klient webowy: https://www.portainer.io/ z możliwością uruchomienia do kontenerze.
+
+### podstawowe komendy
 
 ```
 # lista komend
@@ -98,7 +106,9 @@ docker cp <file> <container>:/
 docker cp <container>:<file> .
 
 ```
+
 ### komendy dodatkowe
+
 ```
 # informacja o stanie dockera (liczba kontenerów, obrazów, cpu, mem, lokalizacji danych)
 docker info
@@ -151,9 +161,10 @@ to w takim przypadku nadpisujemy komendę `CMD` lub `ENTRYPOINT` zapisany w `Doc
 
 Komenda `ENTRYPOINT` umieszczona w `Dockerfile`, w odróżnieniu od `CMD`, pozwala na przekazanie parametrów podczas uruchamiania obrazu, np.
 `docker run <my-image> arg1`
-- w takim przypadku do komendy umieszczonej w `ENTRYPOINT` zostanie przekazany argunet `arg1`
 
-Jednoczesne umieszczenie  `CMD` i `ENTRYPOINT`, powoduję, że `ENTRYPOINT` użyje wartości z tablicy `CMD` jako domyślnego argumentu (działa tylko dla formy "exec" - tablicowej).
+-   w takim przypadku do komendy umieszczonej w `ENTRYPOINT` zostanie przekazany argunet `arg1`
+
+Jednoczesne umieszczenie `CMD` i `ENTRYPOINT`, powoduję, że `ENTRYPOINT` użyje wartości z tablicy `CMD` jako domyślnego argumentu (działa tylko dla formy "exec" - tablicowej).
 
 Komenda `docker run --entrypoint <my-cmd>` pozwala na nadpisanie ENTRYPOINTA podczas wywołania.
 
@@ -162,33 +173,101 @@ Przykładowy plik `Dockerfile` z komentarzami znajduje się w bieżącym katalog
 Mechanizm **multi stage build** polega na tworzenia tymczasowego obrazu, wykorzystywanego następnie w obrazie docelowym. Definicja odbywa się w pliku `Dockerfile` za pomocą klauzuli `AS` w komendzie `FROM`.
 Głównym powodem stosowanie tej techniki jest znaczne zmniejszenie wynikowego obrazu.
 Przykładem może być kompilacja projektu angulara do plików wynikowych (`js`), następnie udostępnienie w finalnym obrazie za pomocą `nginx` tylko statycznych plików wynikowych (bez kodu źródłowego).
+
 #### Wolumeny
-Wolumeny zarządzane przez dockera i żyją niezależnie od kontenera.
+
+##### Wolumeny tymczasowe (deklaracja w pliku Dockerfile)
+
+_Jest to najmiej trwały rodzaj wolumenu - usuwany jest wraz z powiązanym kontenerem._
+
+Deklaracja wolumenu tymczasowego określona jest bezpośrednio w pliku 'Dockerfile' za pomocą klauzuli: `VOLUME`, np.:
+
+```
+VOLUME data1
+
+# lub deklaracja kilku wolumenów
+VOLUME ["/data1", "/data2"]
+```
+
+Operacja spowoduje utworzenie tymczasowego wolumenu podczas tworzenia kontenera.
+Utworzone wolumeny dostępne będą w kontenerze zgodnie z podanymi nazwami w katalogu głównym.
+
+Wolumeny tymczasowe tworzone z tego samego obrazu "nie widzą się" - to osobne wolumeny.
+
+Tymczasowy wolumen **jest kasowany** wraz ze swoim wolumenem.
+
+##### Wolumeny anonimowe
+
+_Jest to obok wolumenu tymczasowego również najmiej trwały rodzaj wolumenu - usuwany jest wraz z powiązanym kontenerem._
+
+Wolumen anonimowy tworzony jest na etapie uruchomienia kontenera, w deklaracji '--volume' nie podajemy nazwy wolumenu, ale tylko folder docelowy.
+W takim przypadku nazwa wolumenu tworzona jest losowa, a wolumen staje się nietrwały - analogicznie do wolumenu tymczasowego.
+
+```
+# wolumen anonimowy
+# jeżeli pominięta zostanie nazwa wolumenu - zostanie ona wylosowana
+# a wolumen stanie się "nietrwały"
+docker run --volume /app my-img1
+```
+
+Anonimowy wolumen **jest kasowany** wraz ze swoim wolumenem.
+
+##### Wolumeny deklarowane (stałe)
+
+Wolumeny deklarowane zarządzane są przez dockera i żyją niezależnie od kontenera - dane pozostają po usunięciu kontenera.
 
 Docker zarządza lokalizacją wolumenów.
 
-wyświetlenie wolumentów wirtualnych dockera
-`docker volume ls`
+podstawowe komendy:
 
-utworzenie
-`docker volume create my1`
+```
+# utworzenie wolumenu
+docker volume create vol1
 
-usuwanie
-`docker volume rm my1`
+# wyświetlenie wolumentów
+docker volume ls
 
-podłączenie wolumenu 'my-vol1' (jeżeli nie istnieje - zostaje utworzony), po ":" podajemy folder, gdzie zostanie podłączony
-`docker run --volume <my-vol1>:/app <my-img1>`
+# usuwanie wolumenu
+docker volume rm vol1
 
-istnieją rózwnież volumeny anonimowe, żeby go utworzyć nie podajemy jego nazwy, np.:
-`docker run --volume /app <my-img1>`
-wówczas tworzy się volumen z losową nazwą
+# podłączenie wolumenu 'vol1' w koneterze w katalogu '/data1' kontenera
+# jeżeli wolumen 'vol1' nie istnieje - zostanie automatycznie utworzony
+docker run --volume vol1:/data app1
+```
 
+_Wskazanie podczas uruchamiania kontenera tego samego wolumenu stałego w dwóch instancjach powoduje, że oba kontenery dzielą ten sam zasób (widzą te same pliki)._
 
-#### Wolumeny bind
-Możemy zamiast wolumentu jako pliku podpiąć katalog, należy wówczas podać **ścieżkę bezględną**.
+Inspekcja wolumentu (zwraca między innymi lokalizację)
+`docker volume inspect vol1`
 
+##### Dowiązania (bind)
 
+Możemy zamiast wolumenu jako pliku podpiąć katalog hosta, należy wówczas podać pełną ścieżkę.
 
+Domyślnie dowiązania działa dwukierunkowo - kontener może zmieniać zawartość dowiązanego katalogu/pliku.
+
+```
+# przypisanie pełnej ścieżki do zmiennej src
+src1="$(pwd)/databases"
+
+# podłączenie dowiązania do katalogu 'data1' w koneterze
+docker run --mount type=bind,source=$src1,target=/data1 app1
+
+# montowanie w trybie tylko do odczytu
+docker run --mount type=bind,source=$src1,target=/data1,readonly app1
+```
+
+Możliwe jest montowanie pojedyńczych plików
+
+```
+# przypisanie pliku z pełną ścieżką do zmiennej src
+src1="$(pwd)/databases/db1.db"
+
+# podłączenie dowiązania pliku 'db_new.db' w koneterze
+docker run --mount type=bind,source=$src1,target=/data1/db_new.db app1
+```
+
+Dowiązanie powoduje "przysłonięcie" oryginalnego katalogu/pliku kontenera, pozwala to np. na nadpisywanie domyślnych konfiguracji.
 
 ### network
 
@@ -203,25 +282,28 @@ Każdy nowy kontener jest domyślnie podłączany pod sieć `bridge`.
 Domyślna sieć `bridge` zapewnia połączenia pomiędzy kontenerami wyłącznie za pomocą adresów IP, ale nie za pomocą nazw.
 
 Wyświetlenie informacji o sieci:
+
 ```
 docker network inspect bridge
 ```
 
 Tworzenie nowej sieci
+
 ```
 docker network create <nazwa-sieci>
 ```
 
 Podłączenie kontenera do sieci (musi istnieć jedno i drugie)
+
 ```
 docker network connect <nazwa-sieci> <container>
 ```
 
 Odłączenie od sieci
+
 ```
 docker network disconnect <nazwa-sieci> <container>
 ```
-
 
 Jeżeli dwa kontenery będą podłączone do określonej (nie domyślnej sieci bridge),
 to widzą się na wzajem poprzez nazwę kontenera.
@@ -233,14 +315,17 @@ Jeżeli podczas tworzenia kontenera podamy sieć przez flagę `--network`, to tw
 będzie podłączony tylko do tej sieci (nie zostanie podłączony do domyślnej sieci `bridge`).
 
 #### budowanie obrazu
-- minimalistyczne: `docker build .`
-- z podaniem tagu (nazwy obrazu): `docker build -t <nazwa-obrazu> .`
-- z podaniem kontekstu*: `docker build -t <nazwa-obrazu> ./src`
-- z inną lokalizacją pliku i kontekstu:
-    `docker build -t <nazwa-obrazu> -f Dockerfile  ./src`
 
-*Kontekst oznacza folder, który wraz z pod-folderami zostanie wysłany do damona dockera. Tylko do tych plików można się odwołać w pliku 'Dockerfile' (np. przez COPY). Kontekst jest jednocześnie bieżącym folderem dla poleceń typu COPY.
+-   minimalistyczne: `docker build .`
+-   z podaniem tagu (nazwy obrazu): `docker build -t <nazwa-obrazu> .`
+-   z podaniem kontekstu\*: `docker build -t <nazwa-obrazu> ./src`
+-   z inną lokalizacją pliku i kontekstu:
+    `docker build -t <nazwa-obrazu> -f Dockerfile ./src`
+
+\*Kontekst oznacza folder, który wraz z pod-folderami zostanie wysłany do damona dockera. Tylko do tych plików można się odwołać w pliku 'Dockerfile' (np. przez COPY). Kontekst jest jednocześnie bieżącym folderem dla poleceń typu COPY.
+
 #### utrwalanie kontenerów
+
 ```
 # stworzenie obrazu na podstawie istniejącego kontenera
 docker commit _container_ _new_image_name_
@@ -255,7 +340,6 @@ docker save <image_name> > <file-name.tar>
 # odczyt obrazu z pliku
 docker load < <file-name.tar>
 ```
-
 
 ### przesyłanie obrazu do docker huba
 
@@ -272,11 +356,12 @@ docker push <user/my-image>
 ```
 
 ### zalecenia dotyczące optymalizacji
-- W pliku `Dockerfile` używać jak najmniej osobnych linii COPY  (tworzyć jedną łączoną przez `&&`) - każda linia, podczas budowy obrazu tworzy tymczasową warstwę (obraz).
-- Do kontektu przekazywać tylko niezbędne katalogi (nie podawać katalogu głównego gdzie znajduje się wiele plików, np. pliku z folderu .git). Ponieważ wszystkie pliki z kontektu muszą byćp rzesłane do demona Dockera. Informacja o wielkości dostępna jest w pierwszej linii budowania dockera: `Sending build context to Docker daemon xxx`
 
+-   W pliku `Dockerfile` używać jak najmniej osobnych linii COPY (tworzyć jedną łączoną przez `&&`) - każda linia, podczas budowy obrazu tworzy tymczasową warstwę (obraz).
+-   Do kontektu przekazywać tylko niezbędne katalogi (nie podawać katalogu głównego gdzie znajduje się wiele plików, np. pliku z folderu .git). Ponieważ wszystkie pliki z kontektu muszą byćp rzesłane do demona Dockera. Informacja o wielkości dostępna jest w pierwszej linii budowania dockera: `Sending build context to Docker daemon xxx`
 
 ## docker-compose
+
 **Docker-compose** konfiguracji uruchomienia jednego lub wielu obrazów ze sobą. Zastępuje "ręczne" uruchamianie obrazu (tworzenie kontenera) z podawania parametrów. Upraszcza uruchomienie i zatrzymanie kompletu obrazów, wprowadza zależności pomiędzy nimi.
 Definicja pliku, (zgodnie z yaml) odbywa się na zasadzie kluczy i wartości.
 
@@ -284,6 +369,7 @@ Konfiguracja znajduje się domyślnie w pliku `docker-compse.yml`, przykładowy 
 
 Jeżeli w pliku nie dodamy nazwy kontenera (`container_name`), wówczas kontener będzie się nazwał wg wzorca:
 `<nazwa-katalogu>_<nazwa-serwisu>_1`
+
 ### Podstawowe komendy
 
 Pobranie/budowanie obrazów oraz stworzenie i uruchomienie konenerów,
@@ -291,7 +377,6 @@ flaga `-d`, oznacza uruchomienie w tle:
 `docker-compose up -d`
 
 Uwaga, uruchomienie bez flagi `-d` i wciśnięcie `CTRL-C` **nie usuwa kontenerów**, tylko je zatrzymuje!
-
 
 Zatrzymanie kontenerów (**Uwaga!!** usuwa kontenery!! ):
 `docker-compose down`
@@ -308,7 +393,6 @@ Uruchomienie z buildem obrazów (jeżeli takie były w definicji):
 Wyświetlenie logów (wszystkich kontenerów):
 `docker-compose logs`
 
-
 Zmiana ustawień sieciowych wymaga przebudowy kontenerów, czyli wykonania `down/up`
 
 Dowolny usługę (kontener) mozna włączyć/wyłączyć używając komendy:
@@ -317,15 +401,17 @@ Dowolny usługę (kontener) mozna włączyć/wyłączyć używając komendy:
 ## Konfiguracja
 
 Format wynikowy komendy `docker ps` można kongigutować w pliku `~/.docker/config.json`, dopisując linię
+
 ```
 {
   "psFormat": "table {{.ID}}\\t{{.Image}}\\t{{.Status}}\\t{{.Names}}"
 }
 ```
+
 źródło: https://devdojo.com/bobbyiliev/how-to-change-the-docker-ps-output-format
 
-
 Wyłączanie usługi dockera:
+
 ```
 sudo systemctl stop docker
 sudo systemctl stop docker.socket

@@ -7,6 +7,19 @@ ENV TZ=Europe/Warsaw
 # wylaczenie pytan
 ENV DEBIAN_FRONTEND=noninteractive
 
+
+# instrukcja ENTRYPOINT działa analogicznie do CMD, z tą różnicą,
+# że pomożna do niej z zewnątrz przekazać argumenty
+# (podczas instancji uruchomiania kontenera)
+# ENTRYPOINT [ "ls", "/etc","-lS" ]
+
+# można użyć jednocześnie CMD i ENTRYPOINT, np.:
+# CMD ["-lt"]
+# ENTRYPOINT [ "ls"]
+# wówczas CMD zawiera tablić domyślnych parametrów dla ENTRYPOINT
+# uwaga instrukcje ENTRYPOINT/CMD powinny być umieszczana
+# zaraz po klauzuli FROM (optymalizacj obrazu), ponieważ, nie są one zmieniane
+
 # wazne, aby zminimalizowac liczbe linii "RUN",
 # - kazda tworzy osobna warstwe
 RUN apt update && apt install vim -y \
@@ -53,15 +66,4 @@ COPY src /var/www/
 # nie działają potoki itp., służy do uruchomienia pojedyńczego programu
 # CMD [ "ls", "/etc","-lS" ]
 # jest to odpowienik: 'ls /etc -lS'
-
-
-# instrukcja ENTRYPOINT działa analogicznie do CMD, z tą różnicą,
-# że pomożna do niej z zewnątrz przekazać argumenty
-# (podczas instancji uruchomiania kontenera)
-# ENTRYPOINT [ "ls", "/etc","-lS" ]
-
-# można użyć jednocześnie CMD i ENTRYPOINT, np.:
-# CMD ["-lt"]
-# ENTRYPOINT [ "ls"]
-# wówczas CMD zawiera tablić domyślnych parametrów dla ENTRYPOINT
 
