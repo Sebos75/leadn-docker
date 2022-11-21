@@ -264,6 +264,8 @@ docker run --mount type=bind,source=$src1,target=/data1 app1
 docker run --mount type=bind,source=$src1,target=/data1,readonly app1
 ```
 
+
+
 Możliwe jest montowanie pojedyńczych plików
 
 ```
@@ -437,6 +439,17 @@ docker-compose up -d --scale <service-name>=n
 docker-compose up -d --scale api=3
 ```
 
+
+## Diagnostyka problemów
+
+### Sprawdzanie adresu ip dla nazwy sieciowej
+Każdy kontener dockera ma adres ip nadawany automatycznie, do komunikacji pomiędzy kontenerami należy używać nazw, ponieważ adresy ip zmieniają się.
+W celu odwołania się jednego kontenera do drugiego należy użyć nazwy serwisu, zdefiniowanego w docker-compose.
+
+```
+// odczytanie adresu ip dla zadanej nazwy
+nslookup <nazwa-sieciowa>
+```
 ## Konfiguracja
 
 Format wynikowy komendy `docker ps` można kongigutować w pliku `~/.docker/config.json`, dopisując linię
