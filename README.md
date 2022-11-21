@@ -196,7 +196,7 @@ Utworzone wolumeny dostępne będą w kontenerze zgodnie z podanymi nazwami w ka
 
 Wolumeny tymczasowe tworzone z tego samego obrazu "nie widzą się" - to osobne wolumeny.
 
-Tymczasowy wolumen **jest kasowany** wraz ze swoim wolumenem.
+Tymczasowy wolumen **jest kasowany** wraz z kontenerem właściciela.
 
 ##### Wolumeny anonimowe
 
@@ -213,6 +213,11 @@ docker run --volume /app my-img1
 ```
 
 Anonimowy wolumen **jest kasowany** wraz ze swoim wolumenem.
+W celu znalezienia wolumentu na dysku hosta, najłatwiej użyć komendy
+
+```
+docker inspect <container> | less
+```
 
 ##### Wolumeny deklarowane (stałe)
 
@@ -252,7 +257,7 @@ Domyślnie dowiązania działa dwukierunkowo - kontener może zmieniać zawarto�
 # przypisanie pełnej ścieżki do zmiennej src
 src1="$(pwd)/databases"
 
-# podłączenie dowiązania do katalogu 'data1' w koneterze
+# podłączenie dowiązania do katalogu 'data1' w konterze
 docker run --mount type=bind,source=$src1,target=/data1 app1
 
 # montowanie w trybie tylko do odczytu
@@ -277,8 +282,8 @@ Wyświetlenie dostępnych sieci
 
 `docker network ls`
 
-Docker tworzy domyślnie sieć `bridge` o typie bridge, sieć `bridge`
-pozwala na łączenie kontenerów między sobą oraz zapewnia dostęp do internetu za pomocą komputera hosta.
+Docker tworzy domyślnie sieć `bridge` o typie bridge.
+Sieć `bridge` pozwala na łączenie kontenerów między sobą oraz zapewnia dostęp do internetu za pomocą komputera hosta.
 Każdy nowy kontener jest domyślnie podłączany pod sieć `bridge`.
 
 Domyślna sieć `bridge` zapewnia połączenia pomiędzy kontenerami wyłącznie za pomocą adresów IP, ale nie za pomocą nazw.
@@ -321,8 +326,8 @@ będzie podłączony tylko do tej sieci (nie zostanie podłączony do domyślnej
 -   minimalistyczne: `docker build .`
 -   z podaniem tagu (nazwy obrazu): `docker build -t <nazwa-obrazu> .`
 -   z podaniem kontekstu\*: `docker build -t <nazwa-obrazu> ./src`
--   z inną lokalizacją pliku i kontekstu:
-    `docker build -t <nazwa-obrazu> -f Dockerfile ./src`
+-   z inną lokalizacją pliku i lokalizacją kontekstu:
+    `docker build -t <nazwa-obrazu> -f Dockerfile2 ./src`
 
 \*Kontekst oznacza folder, który wraz z pod-folderami zostanie wysłany do damona dockera. Tylko do tych plików można się odwołać w pliku 'Dockerfile' (np. przez COPY). Kontekst jest jednocześnie bieżącym folderem dla poleceń typu COPY.
 
@@ -367,16 +372,27 @@ docker push <user/my-image>
 **Docker-compose** konfiguracji uruchomienia jednego lub wielu obrazów ze sobą. Zastępuje "ręczne" uruchamianie obrazu (tworzenie kontenera) z podawania parametrów. Upraszcza uruchomienie i zatrzymanie kompletu obrazów, wprowadza zależności pomiędzy nimi.
 Definicja pliku, (zgodnie z yaml) odbywa się na zasadzie kluczy i wartości.
 
+Podobnie jak docker, komuniakracja odbywa się za pomocą aplikacji klienciej REST api do łączenia z demonem 'Compose'.
+
 Konfiguracja znajduje się domyślnie w pliku `docker-compse.yml`, przykładowy pliku znajduje się w bieżącym katalogu.
 
 Jeżeli w pliku nie dodamy nazwy kontenera (`container_name`), wówczas kontener będzie się nazwał wg wzorca:
 `<nazwa-katalogu>_<nazwa-serwisu>_1`
 
+Po uruchomieniu docker-compose, nazwy zdefiniownych usług stają się nazwą kontenera\* oraz nazwą dns, której inne kontenery mogą używać do komunikacji między sobą.
+
+-   nazwa kontenera tworzona jest przez połączenie nazwy bieżacego folderu oraz nazwy uzsługi.
+
 ### Podstawowe komendy
 
 Pobranie/budowanie obrazów oraz stworzenie i uruchomienie konenerów,
 flaga `-d`, oznacza uruchomienie w tle:
-`docker-compose up -d`
+
+```
+docker-compose up -d
+
+docker-compose up -d --build // z przebudowanie obrazów
+```
 
 Uwaga, uruchomienie bez flagi `-d` i wciśnięcie `CTRL-C` **nie usuwa kontenerów**, tylko je zatrzymuje!
 
@@ -399,6 +415,27 @@ Zmiana ustawień sieciowych wymaga przebudowy kontenerów, czyli wykonania `down
 
 Dowolny usługę (kontener) mozna włączyć/wyłączyć używając komendy:
 `docker-compose start|stop <nazwa-uslugi>`
+
+Logi
+
+```
+docker-compose logs
+
+// po 3 ostatnie linie z każdego kontenera
+docker-compose logs --tail-3
+
+```
+
+### Skalowanie
+
+`docker-compose` pozwala na skalowanie, rzez wielokrotlne uruchomienie wybranej usługi i udostępnianie powiązanych requestów rotacyjnie (rozkład ruchu) .
+
+```
+docker-compose up -d --scale <service-name>=n
+
+// np.
+docker-compose up -d --scale api=3
+```
 
 ## Konfiguracja
 
